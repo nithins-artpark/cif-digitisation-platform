@@ -1,0 +1,129 @@
+import CloudUploadRoundedIcon from "@mui/icons-material/CloudUploadRounded";
+import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
+import { Box, Button, Card, CardContent, Stack, Typography } from "@mui/material";
+import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useCif } from "../../context/CifContext";
+
+function UploadPage() {
+  const navigate = useNavigate();
+  const inputRef = useRef(null);
+  const [isDragActive, setIsDragActive] = useState(false);
+  const { uploadedFile, setUploadedFile, previewUrl, setPreviewUrl } = useCif();
+
+  const handleFile = (file) => {
+    if (!file) return;
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setUploadedFile(file);
+    if (file.type.startsWith("image/") || file.type === "application/pdf") {
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+      return;
+    }
+    setPreviewUrl("");
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    setIsDragActive(false);
+    const file = event.dataTransfer.files?.[0];
+    handleFile(file);
+  };
+
+  return (
+    <Stack spacing={3}>
+      <Box>
+        <Typography variant="h5">Upload CIF Document</Typography>
+        <Typography color="text.secondary">Digitise handwritten case investigation files.</Typography>
+      </Box>
+      <Card>
+        <CardContent>
+          <Box
+            onDrop={handleDrop}
+            onDragOver={(event) => {
+              event.preventDefault();
+              setIsDragActive(true);
+            }}
+            onDragLeave={() => setIsDragActive(false)}
+            sx={{
+              border: "2px dashed",
+              borderColor: isDragActive ? "primary.main" : "#b6c2ce",
+              borderRadius: 2,
+              p: 5,
+              textAlign: "center",
+              bgcolor: isDragActive ? "#f0f6fe" : "background.paper",
+              transition: "all 0.2s ease",
+            }}
+          >
+            <CloudUploadRoundedIcon color="primary" sx={{ fontSize: 42 }} />
+            <Typography mt={1} fontWeight={600}>
+              Drag and drop CIF document
+            </Typography>
+            <Typography variant="body2" color="text.secondary" mb={2}>
+              or select a file from your computer
+            </Typography>
+            <input
+              ref={inputRef}
+              type="file"
+              hidden
+              onChange={(event) => handleFile(event.target.files?.[0])}
+            />
+            <Button variant="outlined" onClick={() => inputRef.current?.click()}>
+              Select Document
+            </Button>
+          </Box>
+        </CardContent>
+      </Card>
+
+      {uploadedFile && (
+        <Card>
+          <CardContent>
+            <Typography variant="subtitle1" fontWeight={700} mb={1}>
+              Document Preview
+            </Typography>
+            <Typography variant="body2" color="text.secondary" mb={2}>
+              File: {uploadedFile.name}
+            </Typography>
+            {uploadedFile.type.startsWith("image/") && previewUrl && (
+              <Box
+                component="img"
+                src={previewUrl}
+                alt="Uploaded CIF preview"
+                sx={{ maxHeight: 360, width: "100%", objectFit: "contain", borderRadius: 1 }}
+              />
+            )}
+            {uploadedFile.type === "application/pdf" && previewUrl && (
+              <Stack spacing={1.5}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <DescriptionRoundedIcon color="primary" />
+                  <Typography>PDF document uploaded and ready for processing.</Typography>
+                </Box>
+                <Box
+                  component="iframe"
+                  src={previewUrl}
+                  title="PDF Preview"
+                  sx={{ width: "100%", height: 360, border: "1px solid #d7dee6", borderRadius: 1 }}
+                />
+              </Stack>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      <Box>
+        <Button
+          variant="contained"
+          size="large"
+          disabled={!uploadedFile}
+          onClick={() => navigate("/processing")}
+        >
+          Start Processing
+        </Button>
+      </Box>
+    </Stack>
+  );
+}
+
+export default UploadPage;
