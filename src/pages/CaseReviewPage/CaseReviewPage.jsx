@@ -165,11 +165,11 @@ function CaseReviewPage() {
 
       <CaseTable rows={rows} onValueChange={handleChange} />
 
-      <Stack direction="row" spacing={1.5}>
-        <Button variant="contained" onClick={handleSave}>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+        <Button variant="contained" onClick={handleSave} sx={{ width: { xs: "100%", sm: "auto" } }}>
           Save Record
         </Button>
-        <Button variant="outlined" onClick={handleMarkVerified}>
+        <Button variant="outlined" onClick={handleMarkVerified} sx={{ width: { xs: "100%", sm: "auto" } }}>
           Mark Verified
         </Button>
       </Stack>

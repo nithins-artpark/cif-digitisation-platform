@@ -10,7 +10,12 @@ function statusColor(status) {
 function SummaryItem({ label, value, status }) {
   return (
     <Stack spacing={0.6}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        justifyContent="space-between"
+        alignItems={{ xs: "flex-start", sm: "center" }}
+        spacing={{ xs: 0.5, sm: 0 }}
+      >
         <Typography variant="body2" color="text.secondary">
           {label}
         </Typography>
@@ -46,7 +51,7 @@ function DocumentCompare({ uploadedFile, previewUrl, caseData, fieldStatus }) {
                 borderRadius: 1,
                 p: 1,
                 bgcolor: "#fafbfd",
-                minHeight: 360,
+                minHeight: { xs: 260, sm: 360 },
               }}
             >
               {uploadedFile?.type?.startsWith("image/") && previewUrl && (
@@ -54,7 +59,7 @@ function DocumentCompare({ uploadedFile, previewUrl, caseData, fieldStatus }) {
                   component="img"
                   src={previewUrl}
                   alt="Original uploaded CIF"
-                  sx={{ width: "100%", maxHeight: 420, objectFit: "contain", borderRadius: 1 }}
+                  sx={{ width: "100%", maxHeight: { xs: 300, sm: 420 }, objectFit: "contain", borderRadius: 1 }}
                 />
               )}
               {uploadedFile?.type === "application/pdf" && previewUrl && (
@@ -62,11 +67,11 @@ function DocumentCompare({ uploadedFile, previewUrl, caseData, fieldStatus }) {
                   component="iframe"
                   src={previewUrl}
                   title="Original CIF PDF"
-                  sx={{ width: "100%", height: 420, border: 0, borderRadius: 1 }}
+                  sx={{ width: "100%", height: { xs: 300, sm: 420 }, border: 0, borderRadius: 1 }}
                 />
               )}
               {!previewUrl && (
-                <Stack alignItems="center" justifyContent="center" sx={{ height: 320 }}>
+                <Stack alignItems="center" justifyContent="center" sx={{ height: { xs: 220, sm: 320 } }}>
                   <DescriptionRoundedIcon color="disabled" sx={{ fontSize: 40 }} />
                   <Typography color="text.secondary">No document preview available</Typography>
                 </Stack>
@@ -84,7 +89,7 @@ function DocumentCompare({ uploadedFile, previewUrl, caseData, fieldStatus }) {
                 borderRadius: 1,
                 p: 1.5,
                 bgcolor: "background.paper",
-                minHeight: 360,
+                minHeight: { xs: 260, sm: 360 },
               }}
             >
               <Stack spacing={1.3}>
@@ -111,7 +116,12 @@ function DocumentCompare({ uploadedFile, previewUrl, caseData, fieldStatus }) {
                 />
                 <Divider />
                 <Stack spacing={0.6}>
-                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Stack
+                    direction={{ xs: "column", sm: "row" }}
+                    justifyContent="space-between"
+                    alignItems={{ xs: "flex-start", sm: "center" }}
+                    spacing={{ xs: 0.5, sm: 0 }}
+                  >
                     <Typography variant="body2" color="text.secondary">
                       Prescribed Medicines
                     </Typography>

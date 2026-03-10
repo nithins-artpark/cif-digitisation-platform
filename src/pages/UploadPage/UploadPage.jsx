@@ -51,7 +51,7 @@ function UploadPage() {
               border: "2px dashed",
               borderColor: isDragActive ? "primary.main" : "#b6c2ce",
               borderRadius: 2,
-              p: 5,
+              p: { xs: 2.5, sm: 4, md: 5 },
               textAlign: "center",
               bgcolor: isDragActive ? "#f0f6fe" : "background.paper",
               transition: "all 0.2s ease",
@@ -96,7 +96,7 @@ function UploadPage() {
             )}
             {uploadedFile.type === "application/pdf" && previewUrl && (
               <Stack spacing={1.5}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
                   <DescriptionRoundedIcon color="primary" />
                   <Typography>PDF document uploaded and ready for processing.</Typography>
                 </Box>
@@ -104,7 +104,12 @@ function UploadPage() {
                   component="iframe"
                   src={previewUrl}
                   title="PDF Preview"
-                  sx={{ width: "100%", height: 360, border: "1px solid #d7dee6", borderRadius: 1 }}
+                  sx={{
+                    width: "100%",
+                    height: { xs: 300, sm: 360 },
+                    border: "1px solid #d7dee6",
+                    borderRadius: 1,
+                  }}
                 />
               </Stack>
             )}
@@ -118,6 +123,7 @@ function UploadPage() {
           size="large"
           disabled={!uploadedFile}
           onClick={() => navigate("/processing")}
+          sx={{ width: { xs: "100%", sm: "auto" } }}
         >
           Start Processing
         </Button>

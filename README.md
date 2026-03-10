@@ -12,6 +12,15 @@ Upload CIF Document -> Processing Timeline -> Case Data Review -> Record Creatio
 - Recharts
 - React Simple Maps
 
+## Prescription Validation (Pre-OCR/LLM Ready)
+
+A standalone Pydantic validation module is included in [`validation/`](./validation) so extraction contracts can be finalized before OCR/LLM integration.
+
+- Strict schema for prescription fields and medicine list
+- Date, numeric sanity, frequency normalization, duplicate medicine consolidation
+- Metadata schema for source, OCR, extraction, quality, provenance, review, and audit
+- Example payload: [`validation/example_prescription_payload.json`](./validation/example_prescription_payload.json)
+
 ## Run Locally
 
 1. Install dependencies:

@@ -1,53 +1,71 @@
 import OpenInFullRoundedIcon from "@mui/icons-material/OpenInFullRounded";
 import CloseFullscreenRoundedIcon from "@mui/icons-material/CloseFullscreenRounded";
-import { Box, Button, Card, CardContent, Chip, IconButton, Stack, Typography } from "@mui/material";
+import { Box, Button, Card, CardContent, Chip, IconButton, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useMemo, useState } from "react";
 import { stateMapDetails } from "../../data/mockData";
 
 function IndiaMap({ selectedStateName = "", onStateSelect }) {
   const [isMaximized, setIsMaximized] = useState(false);
-  const [localStateName, setLocalStateName] = useState("");
+  const [focusAreaId, setFocusAreaId] = useState("gadchiroli-city");
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const mapHeight = isMaximized ? 540 : 360;
-  const zoomLevel = isMaximized ? 6 : 5;
+  const mapHeight = isMobile ? (isMaximized ? 420 : 300) : isMaximized ? 540 : 360;
+  const maharashtraMetrics = stateMapDetails.Maharashtra;
+  const focusAreaOptions = useMemo(
+    () => [
+      {
+        id: "maharashtra-border",
+        label: "Maharashtra Border",
+        mapQuery: "Maharashtra state boundary, India",
+        zoom: isMaximized ? 7 : 6,
+      },
+      {
+        id: "gadchiroli-city",
+        label: "Gadchiroli City",
+        mapQuery: "Gadchiroli, Maharashtra, India",
+        zoom: isMaximized ? 10 : 9,
+      },
+    ],
+    [isMaximized]
+  );
 
   const fallbackState = useMemo(
     () => ({
-      state: "No state selected",
+      state: "Maharashtra",
       cases: "-",
       trend: "-",
     }),
     []
   );
 
-  const activeStateName = selectedStateName || localStateName;
-  const stateOptions = Object.keys(stateMapDetails);
-  const activeState = activeStateName
-    ? {
-        state: activeStateName,
-        cases: stateMapDetails[activeStateName]?.cases ?? "-",
-        trend: stateMapDetails[activeStateName]?.trend ?? "-",
-      }
-    : fallbackState;
-  const mapQuery = activeStateName ? `${activeStateName}, India` : "India";
+  const isMaharashtraSelected = selectedStateName === "Maharashtra";
+  const activeFocusArea =
+    focusAreaOptions.find((item) => item.id === (isMaharashtraSelected ? "maharashtra-border" : focusAreaId)) ??
+    focusAreaOptions[0];
+  const activeState = {
+    state: activeFocusArea.label,
+    cases: maharashtraMetrics?.cases ?? fallbackState.cases,
+    trend: maharashtraMetrics?.trend ?? fallbackState.trend,
+  };
+  const mapQuery = activeFocusArea.mapQuery;
   const mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(
     mapQuery
-  )}&t=&z=${zoomLevel}&ie=UTF8&iwloc=&output=embed`;
+  )}&t=&z=${activeFocusArea.zoom}&ie=UTF8&iwloc=&output=embed`;
 
-  const handleStateSelect = (stateName) => {
+  const handleFocusSelect = (nextFocusAreaId) => {
+    setFocusAreaId(nextFocusAreaId);
     if (onStateSelect) {
-      onStateSelect(stateName);
-      return;
+      onStateSelect("Maharashtra");
     }
-    setLocalStateName(stateName);
   };
 
   return (
     <Card>
       <CardContent>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={1} spacing={1}>
           <Typography variant="subtitle1" fontWeight={700}>
-            Regional Trend Analysis - India Map
+            Regional Trend Analysis - Maharashtra / Gadchiroli Map
           </Typography>
           <IconButton
             onClick={() => setIsMaximized((prev) => !prev)}
@@ -58,7 +76,7 @@ function IndiaMap({ selectedStateName = "", onStateSelect }) {
           </IconButton>
         </Stack>
         <Typography variant="body2" color="text.secondary" mb={2}>
-          Google Maps regional view for state-level case monitoring.
+          Google Maps regional view focused on Maharashtra border and Gadchiroli city.
         </Typography>
         <Box
           sx={{
@@ -73,7 +91,7 @@ function IndiaMap({ selectedStateName = "", onStateSelect }) {
           <Box
             component="iframe"
             src={mapSrc}
-            title="Google India Map"
+            title="Google Maharashtra and Gadchiroli Map"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
             sx={{
@@ -85,17 +103,17 @@ function IndiaMap({ selectedStateName = "", onStateSelect }) {
         </Box>
 
         <Typography variant="body2" color="text.secondary" mt={2} mb={1}>
-          Select a state to focus the map and update CIF metrics.
+          Select a focus area in Maharashtra.
         </Typography>
         <Stack direction="row" flexWrap="wrap" gap={1}>
-          {stateOptions.map((stateName) => (
+          {focusAreaOptions.map((area) => (
             <Button
-              key={stateName}
+              key={area.id}
               size="small"
-              variant={activeStateName === stateName ? "contained" : "outlined"}
-              onClick={() => handleStateSelect(stateName)}
+              variant={activeFocusArea.id === area.id ? "contained" : "outlined"}
+              onClick={() => handleFocusSelect(area.id)}
             >
-              {stateName}
+              {area.label}
             </Button>
           ))}
         </Stack>
@@ -110,7 +128,7 @@ function IndiaMap({ selectedStateName = "", onStateSelect }) {
           }}
         >
           <Typography variant="body2" color="text.secondary">
-            State Name
+            Focus Area
           </Typography>
           <Typography variant="subtitle1" fontWeight={700}>
             {activeState.state}

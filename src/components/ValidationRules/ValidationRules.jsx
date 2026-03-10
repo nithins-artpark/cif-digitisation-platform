@@ -23,9 +23,15 @@ function ValidationRules({ rules }) {
   return (
     <Card>
       <CardContent>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1.5}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          justifyContent="space-between"
+          alignItems={{ xs: "flex-start", sm: "center" }}
+          spacing={{ xs: 1, sm: 0 }}
+          mb={1.5}
+        >
           <Typography variant="h6">Validation Rules</Typography>
-          <Stack direction="row" spacing={1}>
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
             <Chip size="small" color="success" label={`Pass: ${passed}`} />
             <Chip size="small" color="warning" label={`Warn: ${warnings}`} />
             <Chip size="small" color="error" label={`Fail: ${failed}`} />

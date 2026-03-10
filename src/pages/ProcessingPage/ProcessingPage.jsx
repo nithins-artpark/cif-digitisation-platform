@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProcessingTimeline from "../../components/ProcessingTimeline/ProcessingTimeline";
 import { useCif } from "../../context/CifContext";
+import { DEMO_ROLES } from "../../config/roleAccess";
 
 const STEP_CONFIG = [
   {
@@ -47,9 +48,10 @@ function formatSeconds(totalMs) {
   return `${minutes}:${seconds}`;
 }
 
-function ProcessingPage() {
+function ProcessingPage({ activeRole = "" }) {
   const navigate = useNavigate();
   const { uploadedFile } = useCif();
+  const isFrontLineWorker = activeRole === DEMO_ROLES.FRONT_LINE_WORKER;
   const [activeStep, setActiveStep] = useState(0);
   const [completed, setCompleted] = useState(Array(STEP_CONFIG.length).fill(false));
   const [stepProgress, setStepProgress] = useState(0);
@@ -161,7 +163,9 @@ function ProcessingPage() {
       <Box>
         <Typography variant="h5">Document Processing Screen</Typography>
         <Typography color="text.secondary">
-          Simulating OCR and case extraction workflow stages.
+          {isFrontLineWorker
+            ? "Processing uploaded document for case extraction."
+            : "Simulating OCR and case extraction workflow stages."}
         </Typography>
       </Box>
       <Card>
@@ -186,36 +190,40 @@ function ProcessingPage() {
           <Typography variant="body2" color="text.secondary" mb={2}>
             {currentNote} ({progress}% complete)
           </Typography>
-          <Divider sx={{ mb: 2 }} />
-          <ProcessingTimeline
-            steps={STEP_CONFIG.map((step) => step.label)}
-            activeStep={activeStep}
-            completed={completed}
-            stepProgress={stepProgress}
-            currentNote={currentNote}
-          />
-          <Box
-            sx={{
-              mt: 2,
-              p: 1.5,
-              bgcolor: "#f6f8fb",
-              border: "1px solid #d8e0ea",
-              borderRadius: 1,
-              maxHeight: 140,
-              overflowY: "auto",
-            }}
-          >
-            <Typography variant="body2" fontWeight={700} mb={0.8}>
-              Live Processor Log
-            </Typography>
-            <Stack spacing={0.5}>
-              {processingLog.slice(-5).map((item, index) => (
-                <Typography variant="caption" color="text.secondary" key={`${item}-${index}`}>
-                  {item}
+          {!isFrontLineWorker && (
+            <>
+              <Divider sx={{ mb: 2 }} />
+              <ProcessingTimeline
+                steps={STEP_CONFIG.map((step) => step.label)}
+                activeStep={activeStep}
+                completed={completed}
+                stepProgress={stepProgress}
+                currentNote={currentNote}
+              />
+              <Box
+                sx={{
+                  mt: 2,
+                  p: 1.5,
+                  bgcolor: "#f6f8fb",
+                  border: "1px solid #d8e0ea",
+                  borderRadius: 1,
+                  maxHeight: 140,
+                  overflowY: "auto",
+                }}
+              >
+                <Typography variant="body2" fontWeight={700} mb={0.8}>
+                  Live Processor Log
                 </Typography>
-              ))}
-            </Stack>
-          </Box>
+                <Stack spacing={0.5}>
+                  {processingLog.slice(-5).map((item, index) => (
+                    <Typography variant="caption" color="text.secondary" key={`${item}-${index}`}>
+                      {item}
+                    </Typography>
+                  ))}
+                </Stack>
+              </Box>
+            </>
+          )}
         </CardContent>
       </Card>
     </Stack>

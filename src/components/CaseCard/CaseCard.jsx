@@ -4,11 +4,11 @@ import { Box, Button, Card, CardContent, Chip, Stack, Typography } from "@mui/ma
 
 function SummaryRow({ label, value }) {
   return (
-    <Box sx={{ display: "flex", alignItems: "center" }}>
-      <Box sx={{ width: { xs: "45%", sm: "35%" } }}>
+    <Box sx={{ display: "flex", alignItems: { xs: "flex-start", sm: "center" }, flexDirection: { xs: "column", sm: "row" }, gap: { xs: 0.35, sm: 0 } }}>
+      <Box sx={{ width: { xs: "100%", sm: "35%" } }}>
         <Typography color="text.secondary">{label}</Typography>
       </Box>
-      <Box sx={{ width: { xs: "55%", sm: "65%" } }}>
+      <Box sx={{ width: { xs: "100%", sm: "65%" } }}>
         <Typography fontWeight={600}>{value}</Typography>
       </Box>
     </Box>
@@ -61,11 +61,11 @@ function CaseCard({ caseData, recordStatus }) {
           <Typography color="text.secondary">Status:</Typography>
           <Chip label={recordStatus} color="success" size="small" />
         </Stack>
-        <Stack direction="row" spacing={1}>
-          <Button size="small" variant="outlined" startIcon={<EditRoundedIcon />}>
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+          <Button size="small" variant="outlined" startIcon={<EditRoundedIcon />} sx={{ width: { xs: "100%", sm: "auto" } }}>
             Edit Record
           </Button>
-          <Button size="small" variant="outlined" startIcon={<DownloadRoundedIcon />}>
+          <Button size="small" variant="outlined" startIcon={<DownloadRoundedIcon />} sx={{ width: { xs: "100%", sm: "auto" } }}>
             Download Report
           </Button>
         </Stack>
