@@ -44,8 +44,26 @@ const adminAccess = {
   route: "/dashboard",
 };
 
+const announcements = [
+  "Official Notice: All Front Line Workers shall complete daily CIF document uploads before 17:00 hrs to ensure same-day processing.",
+  "Data entered by Front Line Workers will be available for Medical Officer review only after successful processing and validation.",
+  "Mandatory Compliance: Patient identifiers, case number, and document date must be verified before submission to avoid rejection.",
+  "Quality Advisory: Blurred, incomplete, or improperly scanned documents may be returned for correction and re-upload.",
+  "Review Protocol: Medical Officers are requested to prioritize flagged and high-risk cases within the assigned review window.",
+  "Confidentiality Reminder: CIF records contain sensitive health information; unauthorized sharing or download is strictly prohibited.",
+];
+
+const supportDesk = {
+  heading: "Support Desk Assistance",
+  contact:
+    "For technical support related to CIF Digitisation, contact the Helpdesk at +91-XXXXXXXXXX or cif-support@district.gov.in during Monday to Saturday, 10:00 hrs to 18:00 hrs.",
+  note:
+    "For prompt resolution, kindly include the Case ID, a clear screenshot, and the exact error message in your request.",
+};
+
 function LandingPage({ onRoleSelect }) {
   const navigate = useNavigate();
+  const announcementText = announcements.join(" \u2022 ");
 
   return (
     <Box
@@ -92,6 +110,66 @@ function LandingPage({ onRoleSelect }) {
               verification. Current operational region is Gadchiroli.
             </Typography>
           </CardContent>
+        </Card>
+
+        <Card
+          sx={{
+            borderRadius: 2,
+            border: "1px solid rgba(122, 62, 29, 0.24)",
+            bgcolor: "#fff8e8",
+            overflow: "hidden",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1.1, px: { xs: 1.5, md: 2 } }}>
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: 700,
+                letterSpacing: 0.4,
+                textTransform: "uppercase",
+                color: "#7a3e1d",
+                flexShrink: 0,
+              }}
+            >
+              Official Announcements
+            </Typography>
+            <Box sx={{ overflow: "hidden", width: "100%" }}>
+              <Box
+                sx={{
+                  display: "inline-flex",
+                  whiteSpace: "nowrap",
+                  minWidth: "max-content",
+                  animation: "announcementTicker 62s linear infinite",
+                  "@keyframes announcementTicker": {
+                    "0%": { transform: "translateX(0)" },
+                    "100%": { transform: "translateX(-50%)" },
+                  },
+                  "@media (prefers-reduced-motion: reduce)": {
+                    animation: "none",
+                  },
+                  "&:hover": {
+                    animationPlayState: "paused",
+                  },
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ pr: 5, fontSize: { xs: "0.82rem", sm: "0.9rem" } }}
+                >
+                  {announcementText}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  aria-hidden="true"
+                  sx={{ pr: 5, fontSize: { xs: "0.82rem", sm: "0.9rem" } }}
+                >
+                  {announcementText}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
         </Card>
 
         <Box sx={{ display: "flex", justifyContent: "flex-end", px: { xs: 0.5, md: 1 } }}>
@@ -178,6 +256,36 @@ function LandingPage({ onRoleSelect }) {
             );
           })}
         </Grid>
+
+        <Card
+          sx={{
+            borderRadius: 2,
+            border: "1px solid rgba(18, 60, 107, 0.18)",
+            bgcolor: "#f8fbff",
+          }}
+        >
+          <CardContent sx={{ py: 2, px: { xs: 2, md: 2.5 } }}>
+            <Typography
+              variant="caption"
+              sx={{
+                display: "block",
+                mb: 0.75,
+                letterSpacing: 0.4,
+                textTransform: "uppercase",
+                fontWeight: 700,
+                color: "primary.main",
+              }}
+            >
+              {supportDesk.heading}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+              {supportDesk.contact}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.7, lineHeight: 1.7 }}>
+              {supportDesk.note}
+            </Typography>
+          </CardContent>
+        </Card>
       </Stack>
     </Box>
   );
