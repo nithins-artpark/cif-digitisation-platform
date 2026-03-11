@@ -3,6 +3,7 @@ import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
 import { Box, Button, Card, CardContent, Stack, Typography } from "@mui/material";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import BackButton from "../../components/BackButton/BackButton";
 import { useCif } from "../../context/CifContext";
 
 function UploadPage() {
@@ -35,6 +36,7 @@ function UploadPage() {
   return (
     <Stack spacing={3}>
       <Box>
+        <BackButton fallbackPath="/" />
         <Typography variant="h5">Upload CIF Document</Typography>
         <Typography color="text.secondary">Digitise handwritten case investigation files.</Typography>
       </Box>

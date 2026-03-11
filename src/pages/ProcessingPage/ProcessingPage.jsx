@@ -2,6 +2,7 @@ import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRound
 import { Box, Card, CardContent, Chip, Divider, LinearProgress, Stack, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import BackButton from "../../components/BackButton/BackButton";
 import ProcessingTimeline from "../../components/ProcessingTimeline/ProcessingTimeline";
 import { useCif } from "../../context/CifContext";
 import { DEMO_ROLES } from "../../config/roleAccess";
@@ -161,6 +162,7 @@ function ProcessingPage({ activeRole = "" }) {
   return (
     <Stack spacing={3}>
       <Box>
+        <BackButton fallbackPath="/upload" />
         <Typography variant="h5">Document Processing Screen</Typography>
         <Typography color="text.secondary">
           {isFrontLineWorker

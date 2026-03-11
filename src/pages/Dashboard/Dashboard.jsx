@@ -11,6 +11,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import BackButton from "../../components/BackButton/BackButton";
 import DepartmentBarChart from "../../components/Charts/DepartmentBarChart";
 import RegionalBarChart from "../../components/Charts/RegionalBarChart";
 import RegionalLineChart from "../../components/Charts/RegionalLineChart";
@@ -25,16 +26,27 @@ import {
   nationalSegments,
   regionalTrend,
   statusBreakdown,
-  stateNameOptions,
   stateProfiles,
   summaryStats,
   weeklyCaseTrend,
 } from "../../data/mockData";
 
 function Dashboard() {
-  const [selectedStateName, setSelectedStateName] = useState("");
+  const [selectedStateName, setSelectedStateName] = useState("Maharashtra");
+
+  const regionOptions = useMemo(
+    () => [
+      { label: "Gadchiroli", value: "Maharashtra", disabled: false },
+      { label: "Nagpur", value: "Nagpur", disabled: true },
+      { label: "Chandrapur", value: "Chandrapur", disabled: true },
+      { label: "Nashik", value: "Nashik", disabled: true },
+    ],
+    []
+  );
 
   const activeStateProfile = selectedStateName ? stateProfiles[selectedStateName] : null;
+  const selectedRegionLabel =
+    regionOptions.find((item) => item.value === selectedStateName)?.label || "Gadchiroli";
 
   const statCards = useMemo(() => {
     if (!activeStateProfile) return summaryStats;
@@ -53,10 +65,6 @@ function Dashboard() {
   const statusData = activeStateProfile ? activeStateProfile.statusBreakdown : statusBreakdown;
   const segmentData = activeStateProfile ? activeStateProfile.segments : nationalSegments;
 
-  const onMapStateSelect = (stateName) => {
-    setSelectedStateName(stateName);
-  };
-
   return (
     <Stack spacing={3}>
       <Box>
@@ -69,17 +77,25 @@ function Dashboard() {
       <Card>
         <CardContent>
           <FormControl size="small" sx={{ minWidth: { xs: "100%", md: 320 } }}>
-            <InputLabel id="state-select-label">State</InputLabel>
+            <InputLabel id="state-select-label">Region</InputLabel>
             <Select
               labelId="state-select-label"
-              label="State"
+              label="Region"
               value={selectedStateName}
               onChange={(event) => setSelectedStateName(event.target.value)}
             >
-              <MenuItem value="">All States</MenuItem>
-              {stateNameOptions.map((stateName) => (
-                <MenuItem key={stateName} value={stateName}>
-                  {stateName}
+              {regionOptions.map((region) => (
+                <MenuItem
+                  key={region.value}
+                  value={region.value}
+                  disabled={region.disabled}
+                  sx={
+                    region.disabled
+                      ? { color: "text.disabled", bgcolor: "action.disabledBackground" }
+                      : undefined
+                  }
+                >
+                  {region.label}
                 </MenuItem>
               ))}
             </Select>
@@ -99,7 +115,7 @@ function Dashboard() {
         <Grid item xs={12} md={6}>
           <WeeklyCaseTrendChart
             data={trendData}
-            title={selectedStateName ? `${selectedStateName} Weekly Trend` : "Weekly Case Trend"}
+            title={selectedStateName ? `${selectedRegionLabel} Weekly Trend` : "Weekly Case Trend"}
           />
         </Grid>
         <Grid item xs={12} md={6}>
@@ -107,7 +123,7 @@ function Dashboard() {
             data={departmentData}
             title={
               selectedStateName
-                ? `${selectedStateName} Department Distribution`
+                ? `${selectedRegionLabel} Department Distribution`
                 : "Department Case Distribution"
             }
           />
@@ -118,12 +134,12 @@ function Dashboard() {
         <Grid item xs={12} md={6}>
           <StatusPieChart
             data={statusData}
-            title={selectedStateName ? `${selectedStateName} Status Breakdown` : "Case Status Breakdown"}
+            title={selectedStateName ? `${selectedRegionLabel} Status Breakdown` : "Case Status Breakdown"}
           />
         </Grid>
         <Grid item xs={12} md={6}>
           <StateSegmentationCard
-            title={selectedStateName ? `${selectedStateName} Segmentation` : "National Segmentation"}
+            title={selectedStateName ? `${selectedRegionLabel} Segmentation` : "National Segmentation"}
             segments={segmentData}
           />
         </Grid>
@@ -143,7 +159,8 @@ function Dashboard() {
         </Grid>
       </Grid>
 
-      <IndiaMap selectedStateName={selectedStateName} onStateSelect={onMapStateSelect} />
+      <IndiaMap />
+      <BackButton fallbackPath="/" />
     </Stack>
   );
 }

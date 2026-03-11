@@ -1,8 +1,10 @@
 import { Card, CardContent, Stack, Typography } from "@mui/material";
+import BackButton from "../../components/BackButton/BackButton";
 
 function Reports() {
   return (
     <Stack spacing={2}>
+      <BackButton fallbackPath="/dashboard" />
       <Typography variant="h5">Reports</Typography>
       <Card>
         <CardContent>

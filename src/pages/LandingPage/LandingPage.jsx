@@ -1,5 +1,4 @@
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
-import AutoGraphRoundedIcon from "@mui/icons-material/AutoGraphRounded";
 import MedicalServicesRoundedIcon from "@mui/icons-material/MedicalServicesRounded";
 import UploadFileRoundedIcon from "@mui/icons-material/UploadFileRounded";
 import {
@@ -15,17 +14,6 @@ import { useNavigate } from "react-router-dom";
 import { DEMO_ROLES } from "../../config/roleAccess";
 
 const roleCards = [
-  {
-    role: DEMO_ROLES.USER_ANALYTICS,
-    title: "User Analytics",
-    subtitle: "Full Workflow Access",
-    description:
-      "Access end-to-end monitoring and all case management workflows, including dashboard, upload, case review, and reporting.",
-    buttonLabel: "Login as User Analytics",
-    route: "/dashboard",
-    icon: AutoGraphRoundedIcon,
-    accentColor: "#0f4c81",
-  },
   {
     role: DEMO_ROLES.FRONT_LINE_WORKER,
     title: "Front Line Workers",
@@ -49,6 +37,12 @@ const roleCards = [
     accentColor: "#7a3e1d",
   },
 ];
+
+const adminAccess = {
+  role: DEMO_ROLES.USER_ANALYTICS,
+  buttonLabel: "Admin Login",
+  route: "/dashboard",
+};
 
 function LandingPage({ onRoleSelect }) {
   const navigate = useNavigate();
@@ -94,18 +88,32 @@ function LandingPage({ onRoleSelect }) {
               color="text.secondary"
               sx={{ maxWidth: 880, mx: "auto", mt: 1.2, lineHeight: 1.7 }}
             >
-              District-level case investigation digitisation platform for structured health record intake,
-              verification, and program monitoring focused on Maharashtra with priority to Gadchiroli.
+              District-level case investigation digitisation platform for structured health record intake and
+              verification. Current operational region is Gadchiroli.
             </Typography>
           </CardContent>
         </Card>
+
+        <Box sx={{ display: "flex", justifyContent: "flex-end", px: { xs: 0.5, md: 1 } }}>
+          <Button
+            size="small"
+            variant="text"
+            onClick={() => {
+              onRoleSelect?.(adminAccess.role);
+              navigate(adminAccess.route);
+            }}
+            sx={{ color: "text.secondary" }}
+          >
+            {adminAccess.buttonLabel}
+          </Button>
+        </Box>
 
         <Grid container spacing={2.5}>
           {roleCards.map((role) => {
             const IconComponent = role.icon;
 
             return (
-              <Grid key={role.title} item xs={12} md={4}>
+              <Grid key={role.title} item xs={12} md={6}>
                 <Card
                   sx={{
                     height: "100%",

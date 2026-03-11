@@ -1,48 +1,26 @@
 import OpenInFullRoundedIcon from "@mui/icons-material/OpenInFullRounded";
 import CloseFullscreenRoundedIcon from "@mui/icons-material/CloseFullscreenRounded";
-import { Box, Button, Card, CardContent, Chip, IconButton, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { useMemo, useState } from "react";
+import { Box, Card, CardContent, Chip, IconButton, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { useState } from "react";
 import { stateMapDetails } from "../../data/mockData";
 
-function IndiaMap({ selectedStateName = "", onStateSelect }) {
+function IndiaMap() {
   const [isMaximized, setIsMaximized] = useState(false);
-  const [focusAreaId, setFocusAreaId] = useState("gadchiroli-city");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const mapHeight = isMobile ? (isMaximized ? 420 : 300) : isMaximized ? 540 : 360;
   const maharashtraMetrics = stateMapDetails.Maharashtra;
-  const focusAreaOptions = useMemo(
-    () => [
-      {
-        id: "maharashtra-border",
-        label: "Maharashtra Border",
-        mapQuery: "Maharashtra state boundary, India",
-        zoom: isMaximized ? 7 : 6,
-      },
-      {
-        id: "gadchiroli-city",
-        label: "Gadchiroli City",
-        mapQuery: "Gadchiroli, Maharashtra, India",
-        zoom: isMaximized ? 10 : 9,
-      },
-    ],
-    [isMaximized]
-  );
-
-  const fallbackState = useMemo(
-    () => ({
-      state: "Maharashtra",
-      cases: "-",
-      trend: "-",
-    }),
-    []
-  );
-
-  const isMaharashtraSelected = selectedStateName === "Maharashtra";
-  const activeFocusArea =
-    focusAreaOptions.find((item) => item.id === (isMaharashtraSelected ? "maharashtra-border" : focusAreaId)) ??
-    focusAreaOptions[0];
+  const fallbackState = {
+    state: "Gadchiroli",
+    cases: "-",
+    trend: "-",
+  };
+  const activeFocusArea = {
+    label: "Gadchiroli",
+    mapQuery: "Gadchiroli district boundary, Maharashtra, India",
+    zoom: isMaximized ? 13 : 12,
+  };
   const activeState = {
     state: activeFocusArea.label,
     cases: maharashtraMetrics?.cases ?? fallbackState.cases,
@@ -52,13 +30,6 @@ function IndiaMap({ selectedStateName = "", onStateSelect }) {
   const mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(
     mapQuery
   )}&t=&z=${activeFocusArea.zoom}&ie=UTF8&iwloc=&output=embed`;
-
-  const handleFocusSelect = (nextFocusAreaId) => {
-    setFocusAreaId(nextFocusAreaId);
-    if (onStateSelect) {
-      onStateSelect("Maharashtra");
-    }
-  };
 
   return (
     <Card>
@@ -76,7 +47,7 @@ function IndiaMap({ selectedStateName = "", onStateSelect }) {
           </IconButton>
         </Stack>
         <Typography variant="body2" color="text.secondary" mb={2}>
-          Google Maps regional view focused on Maharashtra border and Gadchiroli city.
+          Google Maps regional view focused on Gadchiroli boundary. Map movement is disabled.
         </Typography>
         <Box
           sx={{
@@ -86,6 +57,7 @@ function IndiaMap({ selectedStateName = "", onStateSelect }) {
             overflow: "hidden",
             bgcolor: "#f8fbff",
             transition: "height 0.3s ease",
+            position: "relative",
           }}
         >
           <Box
@@ -98,25 +70,10 @@ function IndiaMap({ selectedStateName = "", onStateSelect }) {
               width: "100%",
               height: "100%",
               border: 0,
+              pointerEvents: "none",
             }}
           />
         </Box>
-
-        <Typography variant="body2" color="text.secondary" mt={2} mb={1}>
-          Select a focus area in Maharashtra.
-        </Typography>
-        <Stack direction="row" flexWrap="wrap" gap={1}>
-          {focusAreaOptions.map((area) => (
-            <Button
-              key={area.id}
-              size="small"
-              variant={activeFocusArea.id === area.id ? "contained" : "outlined"}
-              onClick={() => handleFocusSelect(area.id)}
-            >
-              {area.label}
-            </Button>
-          ))}
-        </Stack>
 
         <Box
           sx={{

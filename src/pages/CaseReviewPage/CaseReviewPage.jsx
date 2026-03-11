@@ -1,6 +1,7 @@
 import { Alert, Box, Button, Grid, Snackbar, Stack, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import BackButton from "../../components/BackButton/BackButton";
 import CaseCard from "../../components/CaseCard/CaseCard";
 import CaseTable from "../../components/CaseTable/CaseTable";
 import DocumentCompare from "../../components/DocumentCompare/DocumentCompare";
@@ -150,6 +151,7 @@ function CaseReviewPage() {
   return (
     <Stack spacing={3}>
       <Box>
+        <BackButton fallbackPath="/processing" />
         <Typography variant="h5">Case Data Review</Typography>
         <Typography color="text.secondary">Review, edit and verify extracted CIF fields.</Typography>
       </Box>
