@@ -1,78 +1,51 @@
-# CIF (Case Investigation Files) Digitisation System
+# CIF Digitisation Platform
 
-React + Vite application demonstrating a government-style health case digitisation workflow:
+## Project Overview
 
-Upload CIF Document -> Processing Timeline -> Case Data Review -> Record Creation -> Dashboard Analytics -> Regional Trend Analysis with India Map
+The CIF Digitisation Platform is a role-based web application for converting paper Case Investigation Files (CIF) into structured digital records.
 
-## Tech Stack
+It supports district health operations by:
 
-- React (Vite)
-- React Router
-- Material UI
-- Recharts
-- React Simple Maps
+- capturing CIF uploads from field teams,
+- guiding records through a processing pipeline,
+- enabling case-data review and correction, and
+- presenting case analytics for monitoring and decision-making.
 
-## Prescription Validation (Pre-OCR/LLM Ready)
+The current demo workflow is aligned to district-level operations, with Gadchiroli shown as the active operational context.
 
-A standalone Pydantic validation module is included in [`validation/`](./validation) so extraction contracts can be finalized before OCR/LLM integration.
+## User Journey
 
-- Strict schema for prescription fields and medicine list
-- Date, numeric sanity, frequency normalization, duplicate medicine consolidation
-- Metadata schema for source, OCR, extraction, quality, provenance, review, and audit
-- Example payload: [`validation/example_prescription_payload.json`](./validation/example_prescription_payload.json)
+### 1. Entry and Role Selection
 
-## Run Locally
+Users land on the home page and choose a role:
 
-1. Install dependencies:
+- Front Line Worker
+- Medical Officer
+- Admin (User Analytics)
 
-```bash
-npm install
-```
+Role selection controls which modules each user can access.
 
-2. Start development server:
+### 2. Front Line Worker Journey
 
-```bash
-npm run dev
-```
+1. Open **Upload CIF** (`/upload`) and submit a case document.
+2. Move to **Processing** (`/processing`) to follow ingestion and extraction stages.
+3. Open **Case Records** (`/case-review`) to verify and edit extracted values.
+4. Finalize the reviewed case for downstream monitoring.
 
-3. Build production bundle:
+### 3. Medical Officer Journey
 
-```bash
-npm run build
-```
+1. Log in to **Dashboard** (`/dashboard`).
+2. Monitor case volume, status mix, and regional performance.
+3. Use visual summaries (including the India map view) to identify trends and review priorities.
 
-## Main Routes
+### 4. Admin / User Analytics Journey
 
-- `/upload` - Upload CIF document and start processing
-- `/processing` - Sequential processing timeline simulation
-- `/case-review` - Editable extracted data table and verification
-- `/dashboard` - Case analytics, regional trends, and India map
-- `/reports` - Reports module placeholder
+1. Access **Dashboard** for system-wide metrics.
+2. Use **Upload CIF**, **Processing**, and **Case Records** for operational checks.
+3. Open **Reports** (`/reports`) for reporting workflows.
 
-## Deploy on Netlify
+### 5. Continuous Operational Cycle
 
-This project is pre-configured for Netlify with:
+The platform is designed as a loop:
 
-- `netlify.toml` for build settings
-- `public/_redirects` for React Router SPA routing
-
-### Option A: Deploy via Netlify UI (recommended)
-
-1. Push this project to GitHub.
-2. In Netlify, click **Add new site** -> **Import an existing project**.
-3. Select your GitHub repo.
-4. Build settings (auto-detected):
-   - Build command: `npm run build`
-   - Publish directory: `dist`
-5. Click **Deploy site**.
-6. After deploy completes, copy the generated Netlify URL and share it with your team lead.
-
-### Option B: Manual deploy using `dist`
-
-1. Run:
-
-```bash
-npm run build
-```
-
-2. In Netlify, go to **Sites** and drag-drop the `dist` folder to deploy.
+Upload -> Process -> Review -> Monitor -> Improve data quality in the next upload cycle.
