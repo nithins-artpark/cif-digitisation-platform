@@ -6,11 +6,11 @@ import { useNavigate } from "react-router-dom";
 import BackButton from "../../components/BackButton/BackButton";
 import { useCif } from "../../context/CifContext";
 
-function UploadPage() {
+function UploadPage({ activeRole }) {
   const navigate = useNavigate();
   const inputRef = useRef(null);
   const [isDragActive, setIsDragActive] = useState(false);
-  const { uploadedFile, setUploadedFile, previewUrl, setPreviewUrl } = useCif();
+  const { uploadedFile, setUploadedFile, previewUrl, setPreviewUrl, addUploadedDocument } = useCif();
 
   const handleFile = (file) => {
     if (!file) return;
@@ -18,6 +18,7 @@ function UploadPage() {
       URL.revokeObjectURL(previewUrl);
     }
     setUploadedFile(file);
+    addUploadedDocument(file, activeRole);
     if (file.type.startsWith("image/") || file.type === "application/pdf") {
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
@@ -70,7 +71,10 @@ function UploadPage() {
               ref={inputRef}
               type="file"
               hidden
-              onChange={(event) => handleFile(event.target.files?.[0])}
+              onChange={(event) => {
+                handleFile(event.target.files?.[0]);
+                event.target.value = "";
+              }}
             />
             <Button variant="outlined" onClick={() => inputRef.current?.click()}>
               Select Document

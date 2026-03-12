@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   Box,
+  Button,
   Card,
   CardContent,
   FormControl,
@@ -11,6 +12,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import BackButton from "../../components/BackButton/BackButton";
 import DepartmentBarChart from "../../components/Charts/DepartmentBarChart";
 import RegionalBarChart from "../../components/Charts/RegionalBarChart";
@@ -20,6 +22,8 @@ import StateSegmentationCard from "../../components/Charts/StateSegmentationCard
 import StatusPieChart from "../../components/Charts/StatusPieChart";
 import WeeklyCaseTrendChart from "../../components/Charts/WeeklyCaseTrendChart";
 import IndiaMap from "../../components/IndiaMap/IndiaMap";
+import { DEMO_ROLES } from "../../config/roleAccess";
+import { useCif } from "../../context/CifContext";
 import {
   casesByState,
   departmentDistribution,
@@ -31,8 +35,12 @@ import {
   weeklyCaseTrend,
 } from "../../data/mockData";
 
-function Dashboard() {
+function Dashboard({ activeRole }) {
+  const navigate = useNavigate();
+  const { uploadedDocuments, clearUploadedDocuments } = useCif();
   const [selectedStateName, setSelectedStateName] = useState("Maharashtra");
+  const isAnalyticsRole = activeRole === DEMO_ROLES.USER_ANALYTICS;
+  const recentUploads = useMemo(() => uploadedDocuments.slice(0, 5), [uploadedDocuments]);
 
   const regionOptions = useMemo(
     () => [
@@ -158,6 +166,42 @@ function Dashboard() {
           <RegionalLineChart data={regionalTrend} />
         </Grid>
       </Grid>
+
+      {isAnalyticsRole && (
+        <Card>
+          <CardContent>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} justifyContent="space-between">
+              <Box>
+                <Typography variant="h6">Recent Uploads</Typography>
+              </Box>
+              <Stack direction="row" spacing={1} sx={{ alignSelf: { xs: "flex-start", sm: "center" } }}>
+                <Button variant="outlined" size="small" onClick={() => navigate("/reports")}>
+                  View More
+                </Button>
+                <Button
+                  variant="text"
+                  color="error"
+                  size="small"
+                  disabled={uploadedDocuments.length === 0}
+                  onClick={clearUploadedDocuments}
+                >
+                  Clear All
+                </Button>
+              </Stack>
+            </Stack>
+
+            {recentUploads.length > 0 && (
+              <Stack mt={2} spacing={1}>
+                {recentUploads.map((item) => (
+                  <Typography key={item.id} fontWeight={600} sx={{ wordBreak: "break-word" }}>
+                    {item.fileName}
+                  </Typography>
+                ))}
+              </Stack>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <IndiaMap />
       <BackButton fallbackPath="/" />

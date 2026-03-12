@@ -53,7 +53,7 @@ function App() {
               path="/dashboard"
               element={
                 <RoleGuard activeRole={activeRole} routePath="/dashboard">
-                  <Dashboard />
+                  <Dashboard activeRole={activeRole} />
                 </RoleGuard>
               }
             />
@@ -61,7 +61,7 @@ function App() {
               path="/upload"
               element={
                 <RoleGuard activeRole={activeRole} routePath="/upload">
-                  <UploadPage />
+                  <UploadPage activeRole={activeRole} />
                 </RoleGuard>
               }
             />
