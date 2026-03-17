@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import base64
-import io
 import json
 import logging
 import os
@@ -13,13 +11,10 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
-import cv2
-import numpy as np
 import requests
 from dotenv import load_dotenv
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from PIL import Image
 from pydantic import BaseModel
 
 load_dotenv()
@@ -39,21 +34,14 @@ STAGE_DEFINITIONS = [
     {
         "id": "image_preprocessing",
         "label": "Image Pre-processing",
-        "note": "Preparing image payload for extraction",
+        "note": "Preparing image payload for model ingestion",
         "done_log": "Image payload normalized for multimodal extraction",
         "expected_ms": 700,
     },
     {
-        "id": "quality_assessment",
-        "label": "Quality Assessment",
-        "note": "Analyzing document quality and readability",
-        "done_log": "Document quality verified for processing",
-        "expected_ms": 500,
-    },
-    {
         "id": "text_detection",
         "label": "Text Detection",
-        "note": "Running multilingual OCR-style extraction",
+        "note": "Running multilingual OCR-style extraction with Qwen",
         "done_log": "Detected handwritten and printed text blocks",
         "expected_ms": 9000,
     },
@@ -370,135 +358,6 @@ def normalize_extraction(raw_data: dict[str, Any]) -> dict[str, Any]:
     return {"caseData": case_data, "fieldStatus": field_status, "recordStatus": record_status}
 
 
-def assess_image_quality(image_data_url: str) -> dict[str, Any]:
-    """
-    Professional image quality assessment for government document processing.
-    Returns quality metrics and pass/fail status.
-    """
-    try:
-        # Extract image from data URL
-        base64_data = image_data_url.split(",")[1]
-        image_bytes = base64.b64decode(base64_data)
-        image = Image.open(io.BytesIO(image_bytes))
-        
-        # Convert to numpy array for OpenCV processing
-        cv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-        gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
-        
-        # Quality metrics
-        metrics = {
-            "resolution": {
-                "width": image.width,
-                "height": image.height,
-                "megapixels": (image.width * image.height) / 1000000,
-                "pass": True  # Basic resolution check
-            },
-            "sharpness": {
-                "score": float(cv2.Laplacian(gray, cv2.CV_64F).var()),
-                "pass": False
-            },
-            "brightness": {
-                "mean": float(np.mean(gray)),
-                "std": float(np.std(gray)),
-                "pass": False
-            },
-            "contrast": {
-                "ratio": 0.0,
-                "pass": False
-            },
-            "text_coverage": {
-                "percentage": 0.0,
-                "pass": False
-            }
-        }
-        
-        # Calculate contrast ratio
-        hist = cv2.calcHist([gray], [0], None, [256], [0, 256])
-        non_zero_hist = hist[hist > 0]
-        if len(non_zero_hist) > 1:
-            metrics["contrast"]["ratio"] = float(np.max(non_zero_hist) / np.min(non_zero_hist))
-        
-        # Estimate text coverage using edge detection
-        edges = cv2.Canny(gray, 50, 150)
-        text_pixels = np.sum(edges > 0)
-        total_pixels = edges.shape[0] * edges.shape[1]
-        metrics["text_coverage"]["percentage"] = float((text_pixels / total_pixels) * 100)
-        
-        # Government document quality standards
-        quality_thresholds = {
-            "sharpness_min": 80.0,      # Minimum for handheld mobile photos
-            "brightness_min": 40.0,     # Minimum for readability
-            "brightness_max": 220.0,    # Maximum to avoid overexposure
-            "contrast_min": 5.0,        # Minimum contrast ratio
-            "text_coverage_min": 8.0,   # Minimum text content
-            "resolution_min_mp": 0.5    # Minimum resolution for mobile
-        }
-        
-        # Apply quality thresholds
-        metrics["sharpness"]["pass"] = metrics["sharpness"]["score"] >= quality_thresholds["sharpness_min"]
-        metrics["brightness"]["pass"] = (
-            quality_thresholds["brightness_min"] <= metrics["brightness"]["mean"] <= quality_thresholds["brightness_max"]
-        )
-        metrics["contrast"]["pass"] = metrics["contrast"]["ratio"] >= quality_thresholds["contrast_min"]
-        metrics["text_coverage"]["pass"] = metrics["text_coverage"]["percentage"] >= quality_thresholds["text_coverage_min"]
-        metrics["resolution"]["pass"] = metrics["resolution"]["megapixels"] >= quality_thresholds["resolution_min_mp"]
-        
-        # Overall quality assessment
-        all_metrics = list(metrics.values())
-        passed_metrics = sum(1 for m in all_metrics if m["pass"])
-        overall_score = (passed_metrics / len(all_metrics)) * 100
-        
-        # Quality classification
-        if overall_score >= 80:
-            quality_level = "EXCELLENT"
-            status = "PASS"
-        elif overall_score >= 60:
-            quality_level = "GOOD"
-            status = "PASS"
-        elif overall_score >= 40:
-            quality_level = "FAIR"
-            status = "WARNING"
-        else:
-            quality_level = "POOR"
-            status = "FAIL"
-        
-        # Generate specific feedback for failed metrics
-        feedback = []
-        if not metrics["sharpness"]["pass"]:
-            feedback.append("Image appears blurry - ensure steady hands when capturing")
-        if not metrics["brightness"]["pass"]:
-            if metrics["brightness"]["mean"] < quality_thresholds["brightness_min"]:
-                feedback.append("Image too dark - improve lighting conditions")
-            else:
-                feedback.append("Image too bright - reduce lighting or adjust exposure")
-        if not metrics["contrast"]["pass"]:
-            feedback.append("Low contrast detected - ensure proper document lighting")
-        if not metrics["text_coverage"]["pass"]:
-            feedback.append("Insufficient text content - ensure document is fully visible")
-        if not metrics["resolution"]["pass"]:
-            feedback.append("Low resolution - capture image from appropriate distance")
-        
-        return {
-            "status": status,
-            "quality_level": quality_level,
-            "overall_score": round(overall_score, 1),
-            "metrics": metrics,
-            "feedback": feedback,
-            "thresholds_used": quality_thresholds
-        }
-        
-    except Exception as exc:
-        logger.error(f"Quality assessment failed: {exc}")
-        return {
-            "status": "FAIL",
-            "quality_level": "ERROR",
-            "overall_score": 0.0,
-            "metrics": {},
-            "feedback": ["Unable to assess image quality - please try uploading again"],
-            "thresholds_used": {}
-        }
-
-
 def get_message_content(message: Any) -> str:
     if isinstance(message, str):
         return message
@@ -695,53 +554,27 @@ async def process_job(job: dict[str, Any], payload: DigitizePayload) -> None:
         mark_stage_completed(job, 1)
 
         mark_stage_running(job, 2)
-        append_log(job, "Assessing document quality for processing")
-        quality_result = await asyncio.to_thread(assess_image_quality, payload.fileDataUrl)
-        
-        if quality_result["status"] == "FAIL":
-            feedback_msg = "; ".join(quality_result["feedback"])
-            append_log(job, f"Quality assessment failed: {feedback_msg}")
-            raise HTTPException(
-                status_code=400, 
-                detail=f"Document quality check failed: {feedback_msg}. Please retake the image with better quality."
-            )
-        elif quality_result["status"] == "WARNING":
-            feedback_msg = "; ".join(quality_result["feedback"])
-            append_log(job, f"Quality warning: {feedback_msg}")
-            logger.info(f"Quality warning for job {job['id']}: {feedback_msg}")
-        else:
-            append_log(job, f"Quality assessment passed: {quality_result['quality_level']} quality")
-        
-        # Store quality metrics in job for analytics
-        job["quality_assessment"] = quality_result
+        extraction_output = await asyncio.to_thread(call_openrouter_for_extraction, normalized_data_url)
+        extracted_data = extraction_output.get("extracted") or {}
+        if has_multilingual_text(extracted_data):
+            extracted_data = await asyncio.to_thread(translate_extraction_to_english, extracted_data)
+            append_log(job, "Translated multilingual extracted fields to English")
         mark_stage_completed(job, 2)
 
         mark_stage_running(job, 3)
-        append_log(job, "Starting text extraction and analysis")
-        extraction_output = await asyncio.to_thread(call_openrouter_for_extraction, normalized_data_url)
-        extracted_data = extraction_output.get("extracted") or {}
-        append_log(job, "Text extraction completed, analyzing results")
-        if has_multilingual_text(extracted_data):
-            append_log(job, "Translating multilingual content to English")
-            extracted_data = await asyncio.to_thread(translate_extraction_to_english, extracted_data)
-            append_log(job, "Translation completed")
+        normalized = normalize_extraction(extracted_data)
         mark_stage_completed(job, 3)
 
         mark_stage_running(job, 4)
-        normalized = normalize_extraction(extracted_data)
-        mark_stage_completed(job, 4)
-
-        mark_stage_running(job, 5)
         job["result"] = {
             **normalized,
             "metadata": {
                 "model": MODEL_NAME,
                 "extractedAt": now_iso(),
-                "quality_assessment": quality_result,
             },
         }
         job["usage"] = extraction_output.get("usage")
-        mark_stage_completed(job, 5)
+        mark_stage_completed(job, 4)
 
         job["status"] = "completed"
         job["completedAt"] = now_iso()

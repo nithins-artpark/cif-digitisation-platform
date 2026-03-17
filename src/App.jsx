@@ -142,7 +142,7 @@ function App() {
           <Routes>
             <Route
               path="/"
-              element={activeRole ? <Navigate to={roleHome} replace /> : <LandingPage authError={authError} />}
+              element={<LandingPage authError={authError} />}
             />
             <Route
               path="/dashboard"

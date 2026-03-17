@@ -16,14 +16,19 @@ function SummaryRow({ label, value }) {
 }
 
 function CaseCard({ caseData, recordStatus }) {
-  const formattedDiagnosis = caseData.diagnosis
-    .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
+  const diagnosisValue = String(caseData.diagnosis || "N/A");
+  const formattedDiagnosis =
+    diagnosisValue.toLowerCase() === "n/a"
+      ? "N/A"
+      : diagnosisValue
+          .split(" ")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(" ");
   const medicines = (caseData.medicines || "")
     .split("\n")
     .map((item) => item.trim())
-    .filter(Boolean);
+    .filter((item) => item && item.toLowerCase() !== "n/a");
+  const chipColor = recordStatus === "Verified" ? "success" : "warning";
 
   return (
     <Card>
@@ -34,7 +39,7 @@ function CaseCard({ caseData, recordStatus }) {
         <Stack spacing={1.2} mb={2}>
           <SummaryRow label="Patient Name" value={caseData.patientName} />
           <SummaryRow label="Age" value={caseData.age} />
-          <SummaryRow label="Department" value={caseData.department} />
+          <SummaryRow label="Sex" value={caseData.sex} />
           <SummaryRow label="Date" value={caseData.date} />
           <SummaryRow label="Symptoms" value={caseData.symptoms} />
           <SummaryRow label="Diagnosis" value={formattedDiagnosis} />
@@ -59,7 +64,7 @@ function CaseCard({ caseData, recordStatus }) {
         </Box>
         <Stack direction="row" alignItems="center" spacing={1} mb={2}>
           <Typography color="text.secondary">Status:</Typography>
-          <Chip label={recordStatus} color="success" size="small" />
+          <Chip label={recordStatus} color={chipColor} size="small" />
         </Stack>
         <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
           <Button size="small" variant="outlined" startIcon={<EditRoundedIcon />} sx={{ width: { xs: "100%", sm: "auto" } }}>
